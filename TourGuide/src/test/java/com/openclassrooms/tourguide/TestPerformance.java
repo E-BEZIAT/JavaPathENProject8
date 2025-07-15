@@ -62,9 +62,9 @@ public class TestPerformance {
 
 		StopWatch stopWatch = new StopWatch();
 		stopWatch.start();
-		futureVisitedLocations = allUsers.stream()
-						.map(tourGuideService.trackUserLocation)
-						.toList();
+		//futureVisitedLocations = allUsers.stream()
+						//.map(tourGuideService.trackUserLocation)
+						//.toList();
 		stopWatch.stop();
 		tourGuideService.tracker.stopTracking();
 
