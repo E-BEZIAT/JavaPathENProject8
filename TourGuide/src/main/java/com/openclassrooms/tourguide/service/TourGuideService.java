@@ -1,30 +1,24 @@
 package com.openclassrooms.tourguide.service;
 
 import com.openclassrooms.tourguide.helper.InternalTestHelper;
+import com.openclassrooms.tourguide.response.AttractionDTO;
 import com.openclassrooms.tourguide.tracker.Tracker;
 import com.openclassrooms.tourguide.user.User;
 import com.openclassrooms.tourguide.user.UserReward;
 
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Random;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+import gpsUtil.location.Location;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import gpsUtil.GpsUtil;
 import gpsUtil.location.Attraction;
-import gpsUtil.location.Location;
 import gpsUtil.location.VisitedLocation;
 
 import tripPricer.Provider;
@@ -80,10 +74,19 @@ public class TourGuideService {
 	}
 
 	public List<Provider> getTripDeals(User user) {
-		int cumulatativeRewardPoints = user.getUserRewards().stream().mapToInt(i -> i.getRewardPoints()).sum();
-		List<Provider> providers = tripPricer.getPrice(tripPricerApiKey, user.getUserId(),
-				user.getUserPreferences().getNumberOfAdults(), user.getUserPreferences().getNumberOfChildren(),
-				user.getUserPreferences().getTripDuration(), cumulatativeRewardPoints);
+		List<UserReward> userRewards = user.getUserRewards();
+		int cumulatativeRewardPoints = userRewards.stream().mapToInt(i -> i.getRewardPoints()).sum();
+		List<Provider> providers = tripPricer.getPrice(
+				tripPricerApiKey,
+				user.getUserId(),
+				user.getUserPreferences().getNumberOfAdults(),
+				user.getUserPreferences().getNumberOfChildren(),
+				user.getUserPreferences().getTripDuration(),
+				cumulatativeRewardPoints
+		);
+		if (providers == null) {
+			providers = Collections.emptyList();
+		}
 		user.setTripDeals(providers);
 		return providers;
 	}
@@ -95,15 +98,26 @@ public class TourGuideService {
 		return visitedLocation;
 	}
 
-	public List<Attraction> getNearByAttractions(VisitedLocation visitedLocation) {
-		List<Attraction> nearbyAttractions = new ArrayList<>();
-		for (Attraction attraction : gpsUtil.getAttractions()) {
-			if (rewardsService.isWithinAttractionProximity(attraction, visitedLocation.location)) {
-				nearbyAttractions.add(attraction);
-			}
-		}
+	public List<AttractionDTO> getNearByAttractions(User user) {
+		Location userLocation = getUserLocation(user).location;
+		List<Attraction> allAttractions = gpsUtil.getAttractions();
+		 return allAttractions.stream()
+				 .map(attraction -> {
+					 Location attractionLocation = new Location(attraction.latitude, attraction.longitude);
+					 double distance = rewardsService.getDistance(attractionLocation, userLocation);
+					 int rewardPoints = rewardsService.getRewardPoints(attraction, user);
 
-		return nearbyAttractions;
+					 return new AttractionDTO(
+							 attraction.attractionName,
+                             attractionLocation,
+                             userLocation,
+							 distance,
+							 rewardPoints
+					 );
+				 })
+				 .sorted(Comparator.comparingDouble(AttractionDTO::getDistance))
+				 .limit(5)
+				 .collect(Collectors.toList());
 	}
 
 	private void addShutDownHook() {
