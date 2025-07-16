@@ -32,7 +32,7 @@ public class RewardsService {
 	private final RewardCentral rewardsCentral;
 	private volatile List<Attraction> attractions = null;
 
-	private final ExecutorService executorService = Executors.newFixedThreadPool(100);
+	private final ExecutorService executor = Executors.newFixedThreadPool(200);
 	
 	public RewardsService(GpsUtil gpsUtil, RewardCentral rewardCentral) {
 		this.gpsUtil = gpsUtil;
@@ -50,24 +50,28 @@ public class RewardsService {
 	public void calculateRewards(User user) {
 		List<VisitedLocation> userLocations = new CopyOnWriteArrayList<>(user.getVisitedLocations());
 		List<Attraction> attractions = getAttractions();
-		List<CompletableFuture<Void>> futures = new ArrayList<>();
 		
 		for(VisitedLocation visitedLocation : userLocations) {
 			for(Attraction attraction : attractions) {
 				if (user.getUserRewards().stream()
 						.noneMatch(reward -> reward.attraction.attractionName.equals(attraction.attractionName))) {
 					if (nearAttraction(visitedLocation, attraction)) {
-						futures.add(CompletableFuture.runAsync(() -> {
 							user.addUserReward(
 									new UserReward(visitedLocation, attraction, getRewardPoints(attraction, user))
 							);
-						}, executorService));
 					}
 				}
 			}
 		}
-		CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).join();
 		System.out.println("Rewards count: " + user.getUserRewards().size());
+	}
+
+	public void listCalculatedRewards(List<User> users) {
+		List<CompletableFuture<Void>> futures = users.stream()
+				.map(user -> CompletableFuture.runAsync(() -> calculateRewards(user), executor))
+				.toList();
+
+		CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).join();
 	}
 
 	private List<Attraction> getAttractions() {
