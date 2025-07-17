@@ -27,7 +27,17 @@ jobs:
         java-version: '17'
         distribution: 'temurin'
         cache: maven
-    - name: Compile with Maven
+
+    - name: Install gpsUtil.jar
+      run: mvn install:install-file -Dfile=TourGuide/libs/gpsUtil.jar -DgroupId=gpsUtil -DartifactId=gpsUtil -Dversion=1.0.0 -Dpackaging=jar
+
+    - name: Install RewardCentral
+      run: mvn install:install-file -Dfile=TourGuide/libs/RewardCentral.jar -DgroupId=RewardCentral -DartifactId=RewardCentral -Dversion=1.0.0 -Dpackaging=jar
+
+    - name: Install TripPricer
+      run: mvn install:install-file -Dfile=TourGuide/libs/TripPricer.jar -DgroupId=TripPricer -DartifactId=TripPricer -Dversion=1.0.0 -Dpackaging=jar
+
+    - name: Compile TourGuide
       working-directory: TourGuide
       run: mvn compile
 
