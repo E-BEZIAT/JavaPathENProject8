@@ -28,19 +28,22 @@ jobs:
         distribution: 'temurin'
         cache: maven
     - name: Compile with Maven
-      run: mvn compile --file 8eme_projet/TourGuide/pom.xml
+      working-directory: TourGuide
+      run: mvn compile
 
     - name: Run unit tests only (exclude performance)
-      run: mvn test -Dtest=!TestPerformance --file 8eme_projet/TourGuide/pom.xml
+      working-directory: TourGuide
+      run: mvn test -Dtest=!TestPerformance
 
     - name: Package application
-      run: mvn package --file 8eme_projet/TourGuide/pom.xml
+      working-directory: TourGuide
+      run: mvn package
       
     - name: Upload artifact
       uses: actions/upload-artifact@v4
       with:
         name: tourguide-jar
-        path: 8eme_projet/TourGuide/target/*.jar
+        path: TourGuide/target/*.jar
 
     # Optional: Uploads the full dependency graph to GitHub to improve the quality of Dependabot alerts this repository can receive
     - name: Update dependency graph
