@@ -32,10 +32,10 @@ jobs:
       run: mvn install:install-file -Dfile=TourGuide/libs/gpsUtil.jar -DgroupId=gpsUtil -DartifactId=gpsUtil -Dversion=1.0.0 -Dpackaging=jar
 
     - name: Install RewardCentral
-      run: mvn install:install-file -Dfile=TourGuide/libs/RewardCentral.jar -DgroupId=RewardCentral -DartifactId=RewardCentral -Dversion=1.0.0 -Dpackaging=jar
+      run: mvn install:install-file -Dfile=TourGuide/libs/RewardCentral.jar -DgroupId=rewardCentral -DartifactId=rewardCentral -Dversion=1.0.0 -Dpackaging=jar
 
     - name: Install TripPricer
-      run: mvn install:install-file -Dfile=TourGuide/libs/TripPricer.jar -DgroupId=TripPricer -DartifactId=TripPricer -Dversion=1.0.0 -Dpackaging=jar
+      run: mvn install:install-file -Dfile=TourGuide/libs/TripPricer.jar -DgroupId=tripPricer -DartifactId=tripPricer -Dversion=1.0.0 -Dpackaging=jar
 
     - name: Compile TourGuide
       working-directory: TourGuide
