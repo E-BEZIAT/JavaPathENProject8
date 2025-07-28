@@ -1,16 +1,16 @@
 package com.openclassrooms.tourguide.tracker;
 
-import java.util.List;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
-
+import com.openclassrooms.tourguide.service.TourGuideService;
+import com.openclassrooms.tourguide.service.UserService;
+import com.openclassrooms.tourguide.user.User;
 import org.apache.commons.lang3.time.StopWatch;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.openclassrooms.tourguide.service.TourGuideService;
-import com.openclassrooms.tourguide.user.User;
+import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 public class Tracker extends Thread {
 	private Logger logger = LoggerFactory.getLogger(Tracker.class);
@@ -18,9 +18,11 @@ public class Tracker extends Thread {
 	private final ExecutorService executorService = Executors.newSingleThreadExecutor();
 	private final TourGuideService tourGuideService;
 	private boolean stop = false;
+	private UserService userService;
 
-	public Tracker(TourGuideService tourGuideService) {
+	public Tracker(TourGuideService tourGuideService, UserService userService) {
 		this.tourGuideService = tourGuideService;
+		this.userService = userService;
 
 		executorService.submit(this);
 	}
@@ -42,7 +44,7 @@ public class Tracker extends Thread {
 				break;
 			}
 
-			List<User> users = tourGuideService.getAllUsers();
+			List<User> users = userService.getAllUsers();
 			logger.debug("Begin Tracker. Tracking " + users.size() + " users.");
 			stopWatch.start();
 			users.forEach(u -> tourGuideService.trackUserLocation(u));

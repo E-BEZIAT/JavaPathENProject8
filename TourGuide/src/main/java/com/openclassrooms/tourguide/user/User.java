@@ -1,17 +1,16 @@
 package com.openclassrooms.tourguide.user;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.UUID;
-
 import gpsUtil.location.VisitedLocation;
-import jdk.jfr.DataAmount;
 import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 import tripPricer.Provider;
+
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.UUID;
 
 @Data
 @Getter
@@ -44,7 +43,9 @@ public class User {
 	}
 	
 	public void addUserReward(UserReward userReward) {
-		if(userRewards.stream().noneMatch(r -> r.attraction.attractionName.equals(userReward.attraction.attractionName))) {
+		if(userRewards.stream().
+				noneMatch(r -> r.attraction.attractionName.equals(userReward.attraction.attractionName))
+		){
 			userRewards.add(userReward);
 		}
 	}
